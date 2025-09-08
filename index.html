@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>enerXIzer - 기업 웰니스 관리 시스템</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav hidden" id="mainNav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>enerXIzer</h1>
+            </div>
+            <div class="nav-menu">
+                <button class="nav-item active" data-view="dashboard">대시보드</button>
+                <button class="nav-item" data-view="scanner" id="scannerNav">바코드 스캔</button>
+                <button class="nav-item" data-view="chat">AI 상담</button>
+                <button class="nav-item admin-only" data-view="admin">관리자</button>
+                <button class="nav-item" id="logoutBtn">로그아웃</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-container">
+        <!-- Welcome Screen -->
+        <div class="view active" id="welcomeView">
+            <div class="welcome-container">
+                <div class="glass-card welcome-card">
+                    <div class="welcome-header">
+                        <h1>enerXIzer</h1>
+                        <p>기업 웰니스 관리 시스템</p>
+                    </div>
+                    <div class="role-selector">
+                        <h2>역할을 선택해주세요</h2>
+                        <div class="role-buttons">
+                            <button class="role-btn" data-role="employee">
+                                <div class="role-icon">👤</div>
+                                <div class="role-info">
+                                    <h3>직원</h3>
+                                    <p>건강 관리 및 간식 추적</p>
+                                </div>
+                            </button>
+                            <button class="role-btn" data-role="admin">
+                                <div class="role-icon">👨‍💼</div>
+                                <div class="role-info">
+                                    <h3>관리자</h3>
+                                    <p>조직 웰니스 관리</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Screen -->
+        <div class="view" id="loginView">
+            <div class="login-container">
+                <div class="glass-card login-card">
+                    <div class="login-header">
+                        <h2 id="loginTitle">직원 로그인</h2>
+                        <button class="back-btn" id="backToWelcome">← 뒤로</button>
+                    </div>
+                    <form class="login-form" id="loginForm">
+                        <div class="form-group">
+                            <label class="form-label" for="employeeId">사원번호</label>
+                            <input type="text" class="form-control" id="employeeId" placeholder="예: EMP001" required>
+                        </div>
+                        <div class="form-group employee-only">
+                            <label class="form-label" for="employeeName">이름</label>
+                            <input type="text" class="form-control" id="employeeName" placeholder="홍길동" required>
+                        </div>
+                        <button type="submit" class="btn btn--primary btn--full-width">로그인</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Employee Dashboard -->
+        <div class="view" id="dashboardView">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h2>안녕하세요, <span id="userName">김직원</span>님!</h2>
+                    <p>오늘의 건강 상태를 확인해보세요</p>
+                </div>
+                
+                <div class="dashboard-stats">
+                    <div class="stat-card glass-card">
+                        <h3>오늘 섭취 칼로리</h3>
+                        <div class="stat-value">
+                            <span id="todayCalories">280</span> / <span id="targetCalories">2000</span> kcal
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="calorieProgress" style="width: 14%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card glass-card">
+                        <h3>설탕 섭취량</h3>
+                        <div class="stat-value">
+                            <span id="todaySugar">9</span> / <span id="targetSugar">25</span> g
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="sugarProgress" style="width: 36%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card glass-card">
+                        <h3>나트륨 섭취량</h3>
+                        <div class="stat-value">
+                            <span id="todaySodium">95</span> / <span id="targetSodium">2300</span> mg
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="sodiumProgress" style="width: 4%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-content">
+                    <div class="recommended-snacks glass-card">
+                        <h3>추천 간식</h3>
+                        <div class="snack-list" id="recommendedSnacks">
+                            <!-- 동적으로 추가됨 -->
+                        </div>
+                    </div>
+
+                    <div class="recent-consumption glass-card">
+                        <h3>최근 섭취 내역</h3>
+                        <div class="consumption-list" id="recentConsumptions">
+                            <!-- 동적으로 추가됨 -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-actions">
+                    <button class="action-btn glass-card" data-view="scanner">
+                        <div class="action-icon">📱</div>
+                        <span>바코드 스캔</span>
+                    </button>
+                    <button class="action-btn glass-card" data-view="chat">
+                        <div class="action-icon">💬</div>
+                        <span>AI 건강 상담</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Barcode Scanner -->
+        <div class="view" id="scannerView">
+            <div class="scanner-container">
+                <div class="scanner-header">
+                    <h2>바코드 스캔</h2>
+                    <p>간식명을 검색하여 영양정보를 확인하세요</p>
+                </div>
+
+                <div class="scanner-search glass-card">
+                    <div class="search-box">
+                        <input type="text" class="form-control" id="productSearch" placeholder="간식명을 입력하세요 (예: 그래놀라바)">
+                        <button class="search-btn" id="searchBtn">검색</button>
+                    </div>
+                </div>
+
+                <div class="product-result glass-card hidden" id="productResult">
+                    <div class="product-info">
+                        <h3 id="productName"></h3>
+                        <div class="nutrition-info">
+                            <div class="nutrition-item">
+                                <span>칼로리</span>
+                                <span id="productCalories"></span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span>설탕</span>
+                                <span id="productSugar"></span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span>나트륨</span>
+                                <span id="productSodium"></span>
+                            </div>
+                            <div class="nutrition-item">
+                                <span>단백질</span>
+                                <span id="productProtein"></span>
+                            </div>
+                        </div>
+                        <div class="consumption-input">
+                            <label class="form-label">섭취량</label>
+                            <select class="form-control" id="consumptionQuantity">
+                                <option value="0.5">0.5개</option>
+                                <option value="1" selected>1개</option>
+                                <option value="2">2개</option>
+                            </select>
+                        </div>
+                        <button class="btn btn--primary" id="recordConsumption">섭취 기록</button>
+                    </div>
+                </div>
+
+                <div class="nutrition-warning glass-card hidden" id="nutritionWarning">
+                    <div class="warning-content">
+                        <h3>⚠️ 영양소 제한량 초과 경고</h3>
+                        <div id="warningDetails"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Chat -->
+        <div class="view" id="chatView">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <h2>AI 건강 상담</h2>
+                    <p>건강과 영양에 대해 언제든지 물어보세요!</p>
+                </div>
+
+                <div class="chat-messages glass-card" id="chatMessages">
+                    <div class="message ai-message">
+                        <div class="message-content">
+                            안녕하세요! 저는 enerXIzer AI 건강 어시스턴트입니다. 건강, 영양, 간식에 대해 궁금한 것이 있으시면 언제든지 물어보세요! 😊
+                        </div>
+                        <div class="message-time">오늘 09:00</div>
+                    </div>
+                </div>
+
+                <div class="quick-questions">
+                    <button class="quick-btn" data-question="오늘 섭취한 칼로리가 너무 적은 것 같아요">칼로리 부족</button>
+                    <button class="quick-btn" data-question="단백질이 부족한 것 같은데 어떤 간식을 먹어야 할까요?">단백질 보충</button>
+                    <button class="quick-btn" data-question="당분을 너무 많이 섭취한 것 같아요">당분 과다</button>
+                </div>
+
+                <div class="chat-input-container glass-card">
+                    <div class="chat-input">
+                        <input type="text" class="form-control" id="chatInput" placeholder="메시지를 입력하세요...">
+                        <button class="send-btn" id="sendBtn">전송</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div class="view" id="adminView">
+            <div class="admin-container">
+                <div class="admin-header">
+                    <h2>관리자 대시보드</h2>
+                    <p>조직의 웰니스 현황을 한눈에 확인하세요</p>
+                </div>
+
+                <div class="admin-stats">
+                    <div class="stat-card glass-card">
+                        <h3>전체 직원 수</h3>
+                        <div class="stat-value">25명</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <h3>평균 건강 점수</h3>
+                        <div class="stat-value">85점</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <h3>이번 달 간식 비용</h3>
+                        <div class="stat-value">₩275,000</div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <h3>재고 부족 상품</h3>
+                        <div class="stat-value">0개</div>
+                    </div>
+                </div>
+
+                <div class="admin-content">
+                    <div class="chart-container glass-card">
+                        <h3>부서별 건강 점수</h3>
+                        <div class="chart-wrapper" style="position: relative; height: 300px;">
+                            <canvas id="departmentChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container glass-card">
+                        <h3>월별 간식 구매 비용</h3>
+                        <div class="chart-wrapper" style="position: relative; height: 300px;">
+                            <canvas id="costChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="inventory-table glass-card">
+                        <h3>재고 현황</h3>
+                        <div class="table-container">
+                            <table class="inventory-table-content">
+                                <thead>
+                                    <tr>
+                                        <th>상품명</th>
+                                        <th>현재 재고</th>
+                                        <th>최소 재고</th>
+                                        <th>상태</th>
+                                        <th>가격</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventoryTableBody">
+                                    <!-- 동적으로 추가됨 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="popular-products glass-card">
+                        <h3>인기 간식 순위</h3>
+                        <div class="popular-list" id="popularProducts">
+                            <!-- 동적으로 추가됨 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal for Health Goals Setup -->
+    <div class="modal hidden" id="healthGoalsModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3>건강 목표 설정</h3>
+                <button class="modal-close" id="closeHealthGoals">&times;</button>
+            </div>
+            <form class="modal-form" id="healthGoalsForm">
+                <div class="form-group">
+                    <label class="form-label">현재 체중 (kg)</label>
+                    <input type="number" class="form-control" id="currentWeight" value="75" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">목표 체중 (kg)</label>
+                    <input type="number" class="form-control" id="targetWeight" value="70" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">일일 목표 칼로리</label>
+                    <input type="number" class="form-control" id="dailyCaloriesGoal" value="2000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">일일 설탕 제한량 (g)</label>
+                    <input type="number" class="form-control" id="dailySugarLimit" value="25">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">일일 나트륨 제한량 (mg)</label>
+                    <input type="number" class="form-control" id="dailySodiumLimit" value="2300">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn--secondary" id="cancelHealthGoals">취소</button>
+                    <button type="submit" class="btn btn--primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
